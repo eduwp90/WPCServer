@@ -20,7 +20,7 @@ var api = new ParseServer({
   javascriptKey: process.env.JAVASCRIPT_KEY || '',  //** add this line no need to set values, they will be overwritten by heroku config vars
   restAPIKey: process.env.REST_API_KEY || '', //** add this line
   dotNetKey: process.env.DOT_NET_KEY || '', //** add this line
-  clientKey: process.env.CLIENT_KEY || '', //** add this line
+  clientKey: process.env.CLIENT_KEY || '' //** add this line
 
 });
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
