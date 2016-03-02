@@ -3,6 +3,7 @@
 
 var express = require('express');
 var ParseServer = require('parse-server').ParseServer;
+var cors = require('cors');
 
 var databaseUri = process.env.DATABASE_URI || process.env.MONGOLAB_URI;
 
@@ -22,6 +23,8 @@ var api = new ParseServer({
 // javascriptKey, restAPIKey, dotNetKey, clientKey
 
 var app = express();
+app.use(cors());
+console.log('indes.js iniciado');
 
 // Serve the Parse API on the /parse URL prefix
 var mountPath = process.env.PARSE_MOUNT || '/parse';
