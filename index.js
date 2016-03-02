@@ -29,7 +29,7 @@ var api = new ParseServer({
 
 var app = express();
 app.use(cors());
-console.log('indes.js iniciado');
+
 
 // Serve the Parse API on the /parse URL prefix
 var mountPath = process.env.PARSE_MOUNT || '/parse';
