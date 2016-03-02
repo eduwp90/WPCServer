@@ -14,15 +14,8 @@ if (!databaseUri) {
 var api = new ParseServer({
   databaseURI: databaseUri || 'mongodb://localhost:27017/dev',
   cloud: process.env.CLOUD_CODE_MAIN || __dirname + '/cloud/main.js',
-  appId: 'Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD' || 'myAppId',
-  masterKey: 'KHbvuLSzmseM7U4QKcNP9bBsYXxbzDsiPVAJ5uhl' || '', //Add your master key here. Keep it secret!
-  serverURL: 'http://wpcenter.herokuapp.com/parse' || 'http://localhost:1337',  // Don't forget to change to https if needed
-  javascriptKey: process.env.JAVASCRIPT_KEY || '',  //** add this line no need to set values, they will be overwritten by heroku config vars
-  restAPIKey: process.env.REST_API_KEY || '', //** add this line
-  dotNetKey: process.env.DOT_NET_KEY || '', //** add this line
-  clientKey: process.env.CLIENT_KEY || '' //** add this line
-
-});
+  appId: process.env.APP_ID || 'myAppId',  
+  masterKey: process.env.MASTER_KEY || '' //Add your master key here. Keep it secret! });
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
 // If you wish you require them, you can set them as options in the initialization above:
 // javascriptKey, restAPIKey, dotNetKey, clientKey
