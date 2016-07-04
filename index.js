@@ -50,7 +50,11 @@ agenda.define('greet the world', function(job, done) {
   done();
 });
 
-agenda.schedule('in 10 seconds', 'greet the world', {time: new Date()});
-agenda.start();
+agenda.on('ready', function() {
+  agenda.every('10 seconds', 'greet the world');
+  agenda.start();
+});
+
+
 
 console.log('Wait 10 seconds...');
