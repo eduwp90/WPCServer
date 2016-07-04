@@ -8,7 +8,7 @@ var Agenda = require('agenda');
 
 
 
-var databaseUri = process.env.DATABASE_URI || process.env.MONGOLAB_URI;
+var databaseUri = process.env.MONGOLAB_URI || process.env.DATABASE_URI;
 
 
 if (!databaseUri) {
@@ -50,7 +50,7 @@ agenda.define('greet the world', function(job, done) {
   done();
 });
 
-agenda.schedule('every 10 seconds', 'greet the world', {time: new Date()});
+agenda.schedule('in 10 seconds', 'greet the world', {time: new Date()});
 agenda.start();
 
 console.log('Wait 10 seconds...');
