@@ -14,7 +14,8 @@
     "parse": "~1.6.12",
     "parse-server": "~2.1.2",
     "cors": "*",
-    "later": "1.2.0"
+    "later": "1.2.0",
+    "moment-timezone": "0.5.4"
   },
   "scripts": {
     "start": "node index.js"
