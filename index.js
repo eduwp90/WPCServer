@@ -4,7 +4,7 @@
 var express = require('express');
 var ParseServer = require('parse-server').ParseServer;
 var cors = require('cors');
-var Agenda = require('agenda');
+
 
 
 
@@ -25,7 +25,8 @@ var api = new ParseServer({
 // If you wish you require them, you can set them as options in the initialization above:
 // javascriptKey, restAPIKey, dotNetKey, clientKey
 });
-var agenda = new Agenda(databaseUri);
+
+
 
 var app = express();
 app.use(cors());
@@ -45,16 +46,3 @@ app.listen(port, function() {
     console.log('parse-server-example running on port ' + port + '.');
 });
 
-agenda.define('greet the world', function(job, done) {
-  console.log(job.attrs.data.time, 'hello world!');
-  done();
-});
-
-agenda.on('ready', function() {
-  agenda.every('10 seconds', 'greet the world');
-  agenda.start();
-});
-
-
-
-console.log('Wait 10 seconds...');
