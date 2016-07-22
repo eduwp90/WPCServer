@@ -15,7 +15,11 @@
     "parse-server": "~2.1.2",
     "cors": "*",
     "later": "1.2.0",
-    "moment-timezone": "0.5.4"
+    "moment-timezone": "0.5.4",
+    "x-ray": "2.3.0",
+    "node-persist": "0.0.11",
+    "superagent-charset": "1.1.1",
+    "superagent": "^2.0.0"
   },
   "scripts": {
     "start": "node index.js"
