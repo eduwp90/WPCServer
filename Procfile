@@ -1,2 +1,2 @@
 web: npm start
-worker: node nada.js
+worker: node inicio_esp.js
