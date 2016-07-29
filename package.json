@@ -19,7 +19,8 @@
     "x-ray": "2.3.0",
     "node-persist": "0.0.11",
     "superagent-charset": "1.1.1",
-    "superagent": "^2.0.0"
+    "superagent": "^2.0.0",
+    "cron":"1.1.0"
   },
   "scripts": {
     "start": "node index.js"
