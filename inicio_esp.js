@@ -37,14 +37,7 @@ var job = new CronJob({
   cronTime: '0 0 0-23/6 * * *',
   onTick: function() {
       console.log("Chequeo de ligas comenzando en ", new Date());
-        
-  },
-  start: false,
-  timeZone: 'Europe/Madrid'
-});
-job.start();
-
-//recuperar datos de todas las ligas españolas
+      //recuperar datos de todas las ligas españolas
         for (i = 0; i < ligas.length; i++) { 
 
         var liga=ligas[i];
@@ -110,3 +103,10 @@ job.start();
         
         
         }
+        
+  },
+  start: false,
+  timeZone: 'Europe/Madrid'
+});
+job.start();
+
