@@ -143,9 +143,13 @@ for (var i = 0; i < ligas.length; i++) {
         
 }
 
+var query = new Parse.Query(Parse.Installation);
+query.equalTo('channels', 'Test');
+
 Parse.Push.send({
   
   data: {
+    where: query,
     channels: [ "Test" ],
     alert: 'Test',
     badge: 1,
