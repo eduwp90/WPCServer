@@ -3,7 +3,7 @@ var Xray = require('x-ray');
 var CronJob = require('cron').CronJob;
 var Parse = require('parse/node');
 var Save = require('./SaveRetrieve.js');
-Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq");
+Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq","KHbvuLSzmseM7U4QKcNP9bBsYXxbzDsiPVAJ5uhl");
 Parse.serverURL = 'https://wpcenter.herokuapp.com/parse'
 
 
