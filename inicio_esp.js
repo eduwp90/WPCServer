@@ -145,12 +145,13 @@ for (var i = 0; i < ligas.length; i++) {
 
 var query = new Parse.Query(Parse.Installation);
 
-query.equalTo('channels', 'Test');
+query.equalTo('deviceType', 'android');
 
 Parse.Push.send({
   where: query,
   data: {
-    alert: 'Test',
+    title: "Mets Score!",
+    alert: 'Test'
     
   }
 }, {
