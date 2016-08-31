@@ -153,9 +153,9 @@ Parse.Push.send({
 }, {
   useMasterKey: true,
   success: function() {
-    // Push sent!
+    console.log("push","OK");
   },
   error: function(error) {
-    // There was a problem :(
+    console.log("push","err");
   }
 });
