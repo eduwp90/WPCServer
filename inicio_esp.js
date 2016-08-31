@@ -156,6 +156,6 @@ Parse.Push.send({
     console.log("push","OK");
   },
   error: function(error) {
-    console.log("push","err");
+    console.log("push",error);
   }
 });
