@@ -143,10 +143,12 @@ for (var i = 0; i < ligas.length; i++) {
         
 }
 
-
+var queryAndroid = new Parse.Query(Parse.Installation);
+queryAndroid.equalTo('deviceType', 'android');
+queryAndroid.equalTo('channels', 'Test');
 
 Parse.Push.send({
-  channels: [ "Test" ],
+  where: queryAndroid,
   data: {
     alert: 'Test',
     
