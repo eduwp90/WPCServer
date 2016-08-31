@@ -147,10 +147,8 @@ var query = new Parse.Query(Parse.Installation);
 query.equalTo('channels', 'Test');
 
 Parse.Push.send({
-  
+  where: query,
   data: {
-    where: query,
-    channels: [ "Test" ],
     alert: 'Test',
     badge: 1,
     sound: 'default'
@@ -158,9 +156,9 @@ Parse.Push.send({
 }, {
   useMasterKey: true,
   success: function() {
-    console.log("push","OK");
+    console.log("---------------push-----------------","OK");
   },
   error: function(error) {
-    console.log("push",error);
+    console.log("----------------push----------------",error);
   }
 });
