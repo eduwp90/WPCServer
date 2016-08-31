@@ -145,7 +145,7 @@ for (var i = 0; i < ligas.length; i++) {
 
 var query = new Parse.Query(Parse.Installation);
 
-query.equalTo('deviceType', 'android');
+query.equalTo('channels', 'Test');
 
 Parse.Push.send({
   where: query,
