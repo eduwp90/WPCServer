@@ -146,6 +146,7 @@ for (var i = 0; i < ligas.length; i++) {
 Parse.Push.send({
   
   data: {
+    channels: [ "Test" ],
     alert: 'Test',
     badge: 1,
     sound: 'default'
