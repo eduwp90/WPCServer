@@ -9,18 +9,21 @@
   },
   "license": "MIT",
   "dependencies": {
+    "cors": "*",
+    "cron": "1.1.0",
+    "cron-job-manager": "1.0.7",
     "express": "~4.14.x",
     "kerberos": "~0.0.x",
+    "later": "1.2.0",
+    "moment": "^2.14.1",
+    "moment-timezone": "0.5.5",
+    "node-persist": "1.0.0",
     "parse": "1.9.1",
     "parse-server": "2.2.18",
-    "cors": "*",
-    "later": "1.2.0",
-    "moment-timezone": "0.5.5",
-    "x-ray": "2.3.0",
-    "node-persist": "1.0.0",
-    "superagent-charset": "1.1.1",
     "superagent": "^2.0.0",
-    "cron":"1.1.0"
+    "superagent-charset": "1.1.1",
+    "time": "^0.11.4",
+    "x-ray": "2.3.0"
   },
   "scripts": {
     "start": "node index.js"

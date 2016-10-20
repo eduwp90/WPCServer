@@ -2,18 +2,28 @@ var request = require('./utiles');
 var Xray = require('x-ray');
 var Parse = require('parse/node');
 
-Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq");
+Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq","KHbvuLSzmseM7U4QKcNP9bBsYXxbzDsiPVAJ5uhl");
 Parse.serverURL = 'https://wpcenter.herokuapp.com/parse'
+// ACL to restrict write to user, and public read access
+var custom_acl = new Parse.ACL(request().user);
+// give write access to the current user
+custom_acl.setPublicWriteAccess(true);
+// give public read access
+custom_acl.setPublicReadAccess(true);
+
 var xray = new Xray().driver(request('Windows-1252'));
 
 
-exports.savePartidoActivoESP = function(fhora, local, visitante, goll, golv, liga, url, goleadoresl, goleadoresv, callback){
+exports.savePartidoActivoESP = function(fhora, local, visitante, goll, golv, liga, url, goleadoresl, goleadoresv, id, JsonRFEN,  callback){
     console.log("GUARDANDO DATOS");
     var GameScore = Parse.Object.extend("Activos");
     
+    
     var gameScore = new GameScore();
+    //gameScore.setACL(custom_acl);
         
     gameScore.save({
+    
     fhora: fhora,
     local: local,
     visitante: visitante,
@@ -22,8 +32,10 @@ exports.savePartidoActivoESP = function(fhora, local, visitante, goll, golv, lig
     url: url,
     goleadoresl:goleadoresl,
     goleadoresv:goleadoresv,
-    liga:liga
-    }, {
+    liga:liga,
+    id:id,
+    JSONrfen:JsonRFEN
+    },{useMasterKey: true}, {
     success: function(gameScore) {
        console.log("The object was saved successfully.",fhora+" "+local+" "+goll+" - "+golv+" "+visitante);
     },
@@ -38,12 +50,3 @@ exports.savePartidoActivoESP = function(fhora, local, visitante, goll, golv, lig
 }
 
 
-xray('http://rfen.es/publicacion/waterpolo/asp/ficha.asp?cod=15651', {
-  equipos: ['td.contenido2[width="40%"]'],
-  resultado: ['td.contenido2[valign="TOP"]'],
-  jugadores: ['td.titulo2[align="left"]'],
-  datos: ['td.titulo2[align="center"]:not([width="3%"])']
-  
-})(function(err, obj) {
-  console.log(JSON.stringify(obj,null,2));
-})

@@ -1,8 +1,10 @@
 var request = require('./utiles');
 var Xray = require('x-ray');
 var CronJob = require('cron').CronJob;
+var CronJobManager = require('cron-job-manager')
 var Parse = require('parse/node');
 var Save = require('./SaveRetrieve.js');
+var moment = require('moment-timezone');
 Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq","KHbvuLSzmseM7U4QKcNP9bBsYXxbzDsiPVAJ5uhl");
 Parse.serverURL = 'https://wpcenter.herokuapp.com/parse'
 
@@ -13,18 +15,19 @@ var xray = new Xray().driver(request('Windows-1252'));
 var storage = require('node-persist');
 
 //ARRAY CON LAS WEB DE LAS LIGAS RFEN
-var ligas = [369, 370, 371, 372, 373];
+var ligas = [396, 397, 398, 399, 400];
 
 storage.initSync();
+storage.clearSync();
 console.log(storage.getItem('jornada_guardada'));
 
 if(storage.getItemSync('jornada_guardada')==undefined){
     var jornada_guardada = {
-    369: 'inicio',
-    370: 'inicio',
-    371: 'inicio',
-    372: 'inicio',
-    373: 'inicio'
+    396: 'inicio',
+    397: 'inicio',
+    398: 'inicio',
+    399: 'inicio',
+    400: 'inicio'
 };
 }else{
     var jornada_guardada = storage.getItemSync('jornada_guardada');
@@ -32,17 +35,15 @@ if(storage.getItemSync('jornada_guardada')==undefined){
 
 
 //PROGRAMAR CHEQUEO JORNADA CADA 6H ('0 0 0-23/6 * * *')
+var manager = new CronJobManager('check jornada activa', 
+  '0 0 0-23/6 * * *', 
+  function() {console.log("Chequeo de ligas comenzando en ", new Date())},
+  {
+    start: true, 
+    timeZone:'Europe/Madrid'
+  }
+  );
 
-var job = new CronJob({
-  cronTime: '0 0 0-23/6 * * *',
-  onTick: function() {
-      console.log("Chequeo de ligas comenzando en ", new Date());
-      
-        
-  },
-  start: true,
-  timeZone: 'Europe/Madrid'
-});
 
 
 //recuperar datos de todas las ligas españolas
@@ -95,13 +96,20 @@ for (var i = 0; i < ligas.length; i++) {
                                      var hora= result.partidos[0].hora[j];
                                      var local= result.partidos[0].local[j].trim();
                                      var visitante= result.partidos[0].visitante[j].trim();
-                                     var resultadol= parseInt(result.partidos[0].resultado[(j*2)]);
-                                     var resultadov= parseInt(result.partidos[0].resultado[(j*2)+1]);
+                                     if(result.partidos[0].resultado[(j*2)]===""){
+                                        var resultadol= 0;
+                                        var resultadov= 0;
+                                     }else{
+                                        var resultadol= parseInt(result.partidos[0].resultado[(j*2)]);
+                                        var resultadov= parseInt(result.partidos[0].resultado[(j*2)+1]); 
+                                     }
+                                     
                                      var url= result.partidos[0].link[j*2];
+                                     var id= local.substr(0,6)+"-"+visitante.substr(0,6)+"-"+ligaact;
                                      console.log("partido "+j, hora+" "+local+" "+resultadol+" - "+resultadov+" "+visitante);
                                      
                                      //GUARDAR PARTIDO EN DB MONGO
-                                     Save.savePartidoActivoESP(hora,local,visitante,resultadol,resultadov,ligaact,url,goleadoresvacio,goleadoresvacio);
+                                     Save.savePartidoActivoESP(hora,local,visitante,resultadol,resultadov,ligaact,url,goleadoresvacio,goleadoresvacio,id,goleadoresvacio);
                                          
                                     }
                                 
@@ -143,23 +151,22 @@ for (var i = 0; i < ligas.length; i++) {
         
 }
 
-var query = new Parse.Query(Parse.Installation);
-
-query.equalTo('channels', 'Test');
-
-Parse.Push.send({
-  where: query,
-  data: {
-    title: "Mets Score!",
-    alert: 'Test'
+programarRefreshPartido("","","");
+function programarRefreshPartido(idpartido, idliga, date){
+    //MANIPULAR date PARA CREAR OBJETO DATE
+    date= "11/09/2016 15:52"; //TEST
+    var date1 = moment.tz(date,["DD-MM-YYYY HH:mm", "DD-MM-YYYY"], 'Europe/Madrid' );
+    console.log("DATE ", date1.toDate())
     
-  }
-}, {
-  useMasterKey: true,
-  success: function() {
-    console.log("---------------push-----------------","OK");
-  },
-  error: function(error) {
-    console.log("----------------push----------------",error);
-  }
-});
+    //CRONJOB CON FECHAY HORA DE FINAL DEL PARTIDO MAS XMIN--CRONJOB
+    var job = new CronJob(date1.toDate(),  function () {
+          console.log("-----------COMENZANDO A LA DATE PROGRAMADA-------------- ", date1.toDate())
+        },
+        true, /* Start the job right now */
+        'Europe/Madrid' /* Time zone of this job. */
+    );
+   
+    //WHILE !FINALIZADO REPETIR CADA MINUTO HASTA FINALIZADO--MANAGER
+    
+    //GUARDAR Y DAR NOTIFICACION
+}
