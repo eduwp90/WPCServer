@@ -1,172 +1,143 @@
-var request = require('./utiles');
-var Xray = require('x-ray');
-var CronJob = require('cron').CronJob;
-var CronJobManager = require('cron-job-manager')
-var Parse = require('parse/node');
-var Save = require('./SaveRetrieve.js');
-var moment = require('moment-timezone');
+//const utiles = require('./utiles');
+const Parse = require('parse/node');
+const rp = require('request-promise');
+const request = require('request');
+const cheerio = require('cheerio');
+const Save = require('./SaveRetrieve.js');
+const moment = require('moment-timezone');
+const storage = require('node-persist');
+
 Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq","KHbvuLSzmseM7U4QKcNP9bBsYXxbzDsiPVAJ5uhl");
 Parse.serverURL = 'https://wpcenter.herokuapp.com/parse'
 
-
-
-
-var xray = new Xray().driver(request('Windows-1252'));
-var storage = require('node-persist');
-
 //ARRAY CON LAS WEB DE LAS LIGAS RFEN
-var ligas = [396, 397, 398, 399, 400];
-
-storage.initSync();
-storage.clearSync();
-console.log(storage.getItem('jornada_guardada'));
-
-if(storage.getItemSync('jornada_guardada')==undefined){
-    var jornada_guardada = {
-    396: 'inicio',
-    397: 'inicio',
-    398: 'inicio',
-    399: 'inicio',
-    400: 'inicio'
-};
-}else{
-    var jornada_guardada = storage.getItemSync('jornada_guardada');
-}
+const ligas = ["693506/calendar/1783704/", "693435/calendar/1782173/", "698931/calendar/1789530/", "696708/calendar/1785001/", "703924/calendar/1804510/"];
+const jornadas = [9636059, 9622408, 9674865, 9636114, 9730530];
 
 
-//PROGRAMAR CHEQUEO JORNADA CADA 6H ('0 0 0-23/6 * * *')
-var manager = new CronJobManager('check jornada activa', 
-  '0 0 0-23/6 * * *', 
-  function() {console.log("Chequeo de ligas comenzando en ", new Date())},
-  {
-    start: true, 
-    timeZone:'Europe/Madrid'
-  }
-  );
+var url = 'https://rfen.es/es/tournament/'+ligas[0]+(jornadas[0]+10);
 
 
 
-//recuperar datos de todas las ligas españolas
-for (var i = 0; i < ligas.length; i++) { 
 
-        var liga=ligas[i];
- 
-        xray('http://rfen.es/publicacion/waterpolo/asp/resultados.asp?c='+liga,{
-          jornada: 'h3',
-          partidos: xray('body', [{
-            hora:['td.titulo2[width="10%"]'],
-            local: ['td.contenido2[align="right"]'],
-            visitante: ['td.contenido2[align="left"]'],
-            resultado: ['td.titulo2[width="5%"]'],
-            link: ['td.titulo2[width="5%"] a @ href'],
-            liga: 'select.combo[name="jornadas"] option:nth-child(2) @ value',
-            
-            
-          }]) 
-          
-        })(function(err, result) {
-            if (!err){
-                console.log(JSON.stringify(result,null,2));
-                 var goleadoresvacio = {};
-                
-                 
-                 //CONSEGUIR ID DE LIGA
-                var ligaact=result.partidos[0].liga;
-                ligaact= ligaact.slice(ligaact.length-7,ligaact.length-4);
-                console.log(ligaact);
-                
-                //PROCESAR DATOS (si la jornada ha cambiado):
-                if(result.jornada!=jornada_guardada[ligaact]){
-                    //ELIMINAR ENTRADAS ANTIGUAS DB
-                    var GameScore = Parse.Object.extend("Activos");
-                    var queryObject = new Parse.Query(GameScore);
-                    queryObject.equalTo("liga", ligaact);
+
+  
+rp(url)
+.then(async (html) => {
+  
+  const $ = cheerio.load(html);
+  
+  //preparar liga JSON
+  var datosJSON = { "jornada":"", "partidos":[]};
+  
+  //Scrape jornada numero
+  var jornadasText = $('.clearfix').find('h2').first().text();
+  jornadasText = jornadasText.slice(8, 10).replace(" ", "");
+  datosJSON.jornada = jornadasText;
+  let urls = [];
+  
+  $('.rowlink tr').each((i, tr) => {
     
-                    queryObject.find({
-                    success: function (results) {
-                        
-                            
-                            Parse.Object.destroyAll(results,{
-                            success: function(myObject) {
-                                console.log("deleted all objects de liga ",ligaact);
-                                
-                                //DATOS DE PARTIDOS
-                                    for (var j = 0; j < result.partidos[0].hora.length; j++) { 
-                                     
-                                     var hora= result.partidos[0].hora[j];
-                                     var local= result.partidos[0].local[j].trim();
-                                     var visitante= result.partidos[0].visitante[j].trim();
-                                     if(result.partidos[0].resultado[(j*2)]===""){
-                                        var resultadol= 0;
-                                        var resultadov= 0;
-                                     }else{
-                                        var resultadol= parseInt(result.partidos[0].resultado[(j*2)]);
-                                        var resultadov= parseInt(result.partidos[0].resultado[(j*2)+1]); 
-                                     }
-                                     
-                                     var url= result.partidos[0].link[j*2];
-                                     var id= local.substr(0,6)+"-"+visitante.substr(0,6)+"-"+ligaact;
-                                     console.log("partido "+j, hora+" "+local+" "+resultadol+" - "+resultadov+" "+visitante);
-                                     
-                                     //GUARDAR PARTIDO EN DB MONGO
-                                     Save.savePartidoActivoESP(hora,local,visitante,resultadol,resultadov,ligaact,url,goleadoresvacio,goleadoresvacio,id,goleadoresvacio);
-                                         
-                                    }
-                                
-                                //GUARDAR DATOS DE JORNADA EN SERVIDOR
-                                jornada_guardada[ligaact] = result.jornada;
-                                console.log("JG",jornada_guardada);
-                                storage.removeItemSync('jornada_guardada');
-                                storage.setItemSync('jornada_guardada',jornada_guardada);
-                                    
-                                ////////
-                                
-                                
-                                },
-                            error: function(myObject, error) {
-                                // The delete failed.
-                                // error is a Parse.Error with an error code and description.
-                            }
-                        
-                            });
-                        
-                        
-                        
-                    },
-                    error: function (error) {
-                        alert("Error: " + error.code + " " + error.message);
-                    }
-                    });
-                
-                    
-                }
-                
-                
-            }else{
-                console.log(err);
-            };
+    let urlPartido = $(tr).find('.colstyle-equipo a').attr('href');
+    //Añadir datos de url
+    urls.push(urlPartido);
+    
+  });
+  
+  await Promise.all(urls.map(async num => {
+    let partidoJSON = await scrapeDatosPartido(jornadasText,num);
+    datosJSON.partidos.push(partidoJSON);
+    Save.savePartidoActivoESP(partidoJSON, ligas[0], jornadasText);
+  }))
+  
+  console.log(datosJSON);
+  
+  
+})
+
+.catch(function (err) {
+    console.log(err);
+});
+    
+  
+      
+      
+    
+
+
+function scrapeDatosPartido(jornada,url) {
+  
+  //Preparar JSON de retorno
+  let datosPartidoJSON = { "id":"", "jornada":jornada, "fhora":"", "local":"", "visitante":"", "goll":"", "golv":"", "url":url, "localJug":[], "visitanteJug":[]};
+  
+  return rp(url)
+    .then(function (html) {
+      let $ = cheerio.load(html);
+      
+      let id = $('h1').text();
+      let equipos = id.split(" — ");
+      datosPartidoJSON.local = equipos[0];
+      datosPartidoJSON.visitante = equipos[1];
+      datosPartidoJSON.id = id;
+      
+      let localg = $('#match-summary div span').eq(2).text();
+      let visitanteg = $('#match-summary div span').eq(6).text();
+      
+      if (localg.length > 0){
+        
+        datosPartidoJSON.goll = localg;
+        datosPartidoJSON.golv = visitanteg;
+        datosPartidoJSON.fhora = "Finalizado";
+        
+        //DAtos de jugadores
+        $('.match-data').find('.rowlink').each((i,table) => {
+           $(table).find('tr').each((j, tr) => {
+            //Preparar JSON de jugador
+            let jugadoresPartidoJSON = { "nombre":"", "GT":"", "IGD":"", "SUP":"", "GPEN":"", "EXP":"", "PEN":""};
+            
+            jugadoresPartidoJSON.nombre = $(tr).find('.colstyle-nombre').first().text().trim();
+            jugadoresPartidoJSON.GT = $(tr).find('.colstyle-goles').first().text().trim();
+            jugadoresPartidoJSON.IGD = $(tr).find('.colstyle-goles-igualdad').first().text().trim();
+            jugadoresPartidoJSON.SUP = $(tr).find('.colstyle-goles-superior').first().text().trim();
+            jugadoresPartidoJSON.GPEN = $(tr).find('.colstyle-goles-penalti').first().text().trim();
+            jugadoresPartidoJSON.PEN = $(tr).find('.colstyle-faltas-por-penalti').first().text().trim();
+            jugadoresPartidoJSON.EXP = $(tr).find('.colstyle-expulsion').first().text().trim();
+            
+            
+            //Elegir donde meter datos
+            if (i==0) {
+              datosPartidoJSON.localJug.push(jugadoresPartidoJSON);
+            }
+            else
+            {
+              datosPartidoJSON.visitanteJug.push(jugadoresPartidoJSON);
+            }
+          
+          });
           
         });
         
-        
+      }
+      else
+      {
+        let hora = $('.auto-row').find('.col').eq(0).text().replace(/\s\s+/g, '').trim().slice(4, 9);
+        let fecha = $('.auto-row').find('.col').eq(1).text().replace(/\s\s+/g, '').trim().slice(10, 20);
+        datosPartidoJSON.fhora = fecha +" " +hora; 
+        datosPartidoJSON.goll = 0;
+        datosPartidoJSON.golv = 0;
+      }
+      
+      
+      
+      
+      //console.log(datosPartidoJSON);
+      return datosPartidoJSON;
+      
+    })
+    .catch(function (err) {
+        console.log(err);
+    });
+  
+
 }
 
-programarRefreshPartido("","","");
-function programarRefreshPartido(idpartido, idliga, date){
-    //MANIPULAR date PARA CREAR OBJETO DATE
-    date= "11/09/2016 15:52"; //TEST
-    var date1 = moment.tz(date,["DD-MM-YYYY HH:mm", "DD-MM-YYYY"], 'Europe/Madrid' );
-    console.log("DATE ", date1.toDate())
-    
-    //CRONJOB CON FECHAY HORA DE FINAL DEL PARTIDO MAS XMIN--CRONJOB
-    var job = new CronJob(date1.toDate(),  function () {
-          console.log("-----------COMENZANDO A LA DATE PROGRAMADA-------------- ", date1.toDate())
-        },
-        true, /* Start the job right now */
-        'Europe/Madrid' /* Time zone of this job. */
-    );
-   
-    //WHILE !FINALIZADO REPETIR CADA MINUTO HASTA FINALIZADO--MANAGER
-    
-    //GUARDAR Y DAR NOTIFICACION
-}

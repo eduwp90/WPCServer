@@ -1,29 +1,31 @@
 {
-  "name": "parse-server-example",
-  "version": "1.2.0",
-  "description": "An example Parse API server using the parse-server module",
+  "name": "WPCenter",
+  "version": "0.1.0",
+  "description": "Webserver for mobile app WPCenter",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ParsePlatform/parse-server-example"
+    "url": ""
   },
   "license": "MIT",
   "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
     "cors": "*",
-    "cron": "1.1.0",
-    "cron-job-manager": "1.0.7",
-    "express": "~4.14.x",
-    "kerberos": "~0.0.x",
+    "cron": "1.5.0",
+    "cron-job-manager": "2.1.1",
+    "express": "~4.16.x",
+    "kerberos": "~1.1.x",
     "later": "1.2.0",
     "moment": "^2.14.1",
-    "moment-timezone": "0.5.5",
-    "node-persist": "1.0.0",
-    "parse": "1.9.1",
-    "parse-server": "2.2.18",
-    "superagent": "^2.0.0",
-    "superagent-charset": "1.1.1",
-    "time": "^0.11.4",
-    "x-ray": "2.3.0"
+    "moment-timezone": "0.5.23",
+    "node-persist": "3.0.1",
+    "parse": "2.1.0",
+    "parse-server": "^3.1.1",
+    "request-promise": "^4.2.2",
+    "superagent": "^4.0.0",
+    "superagent-charset": "1.2.0",
+    "time": "^0.12.0",
+    "x-ray": "2.3.3"
   },
   "scripts": {
     "start": "node index.js"
