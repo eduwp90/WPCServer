@@ -10,7 +10,7 @@ Parse.serverURL = 'https://wpcenter.herokuapp.com/parse'
 var xray = new Xray().driver(request('Windows-1252'));
 
 
-exports.savePartidoActivoESP = function(partidoJSON, liga, jornada,  callback){
+exports.savePartidoActivoESP = function(partidoJSON, liga, jornada){
     console.log("GUARDANDO DATOS");
     var GS = Parse.Object.extend(liga);
     
@@ -20,7 +20,7 @@ exports.savePartidoActivoESP = function(partidoJSON, liga, jornada,  callback){
         
     gameScore.save({
         
-    jornada: parseInt(jornada),
+    jornada: parseInt(partidoJSON.goll),
     fhora: moment(partidoJSON.fhora, 'DD/MM/YYYY HH:mm').toDate() ,
     local: partidoJSON.local,
     visitante: partidoJSON.visitante,
@@ -32,14 +32,12 @@ exports.savePartidoActivoESP = function(partidoJSON, liga, jornada,  callback){
     liga: liga,
     id: partidoJSON.id,
     
-    }, {
-    success: function(gameScore) {
+    })
+    .then((gameScore) =>{
        console.log("The object was saved successfully.",gameScore);
-    },
-    error: function(gameScore, error) {
+    },(error) => {
         console.log("The save failed.",error);
         // error is a Parse.Error with an error code and message.
-    }
     });
     
     
