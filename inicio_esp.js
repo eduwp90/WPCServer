@@ -50,7 +50,7 @@ rp(url)
     Save.savePartidoActivoESP(partidoJSON, ligas[0], jornadasText);
   }))
   
-  console.log(datosJSON);
+  //console.log(datosJSON);
   
   
 })
