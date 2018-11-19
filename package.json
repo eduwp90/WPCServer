@@ -9,23 +9,22 @@
   },
   "license": "MIT",
   "dependencies": {
+    "agenda": "^2.0.2",
+    "agendash": "^0.4.0",
     "cheerio": "^1.0.0-rc.2",
     "cors": "*",
-    "cron": "1.5.0",
-    "cron-job-manager": "2.1.1",
     "express": "~4.16.x",
     "kerberos": "~1.1.x",
-    "later": "1.2.0",
     "moment": "^2.14.1",
     "moment-timezone": "0.5.23",
+    "mongodb": "^3.1.10",
     "node-persist": "3.0.1",
     "parse": "2.1.0",
     "parse-server": "^3.1.1",
     "request-promise": "^4.2.2",
     "superagent": "^4.0.0",
     "superagent-charset": "1.2.0",
-    "time": "^0.12.0",
-    "x-ray": "2.3.3"
+    "time": "^0.12.0"
   },
   "scripts": {
     "start": "node index.js"

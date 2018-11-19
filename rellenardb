@@ -1,0 +1,56 @@
+//ARRAY CON LAS WEB DE LAS LIGAS RFEN
+const ligas = ["693506/calendar/1783704/", "693435/calendar/1782173/", "698931/calendar/1789530/", "696708/calendar/1785001/", "703924/calendar/1804510/"];
+const jornadas = [9636059, 9622408, 9674865, 9636114, 9730530];
+const nomLigas = ["DHM", "DHF", "PDM", "PDF", "SDM"];
+
+
+
+
+
+for (var k = 0; k < 22; k++) { 
+    var url = 'https://rfen.es/es/tournament/'+ligas[4]+(jornadas[4]+k);
+    
+    //console.log(url);
+  
+    rp(url)
+    .then(async (html) => {
+      
+      const $ = cheerio.load(html);
+      
+      //preparar liga JSON
+      var datosJSON = { "jornada":"", "partidos":[]};
+      
+      //Scrape jornada numero
+      var jornadasText = await $('.clearfix').find('h2').first().text();
+      jornadasText = jornadasText.slice(8, 10).replace(" ", "");
+      //console.log(jornadasText);
+      datosJSON.jornada = jornadasText;
+      
+      let urls = [];
+      
+      $('.rowlink tr').each((i, tr) => {
+        let datos = {"fecha":"", "url":""};
+        let fechaText = $(tr).find('.colstyle-fecha').text().replace(/\s\s+/g, '').slice(5, 21).replace(/[^0-9/: ]/g, '').trim();
+        let urlPartido = $(tr).find('.colstyle-equipo a').attr('href');
+        //Añadir datos de url y fecha
+        datos.fecha = fechaText;
+        datos.url = urlPartido;
+        urls.push(datos);
+        
+      });
+      
+      await Promise.all(urls.map(async num => {
+        let partidoJSON = await scrapeDatosPartido(jornadasText,num.url,num.fecha);
+        datosJSON.partidos.push(partidoJSON);
+        Save.savePartidoActivoESP(partidoJSON, nomLigas[4], jornadasText);
+      }));
+      
+      //console.log(datosJSON);
+      
+      
+    })
+    
+    .catch(function (err) {
+        console.log(err);
+    });
+}

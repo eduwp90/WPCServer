@@ -4,78 +4,59 @@ const rp = require('request-promise');
 const request = require('request');
 const cheerio = require('cheerio');
 const Save = require('./SaveRetrieve.js');
-const moment = require('moment-timezone');
-const storage = require('node-persist');
+const tz = require('moment-timezone');
+const Agenda = require('agenda');
+const moment = require('moment');
+const { MongoClient } = require('mongodb');
+
 
 Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq","KHbvuLSzmseM7U4QKcNP9bBsYXxbzDsiPVAJ5uhl");
-Parse.serverURL = 'https://wpcenter.herokuapp.com/parse'
+Parse.serverURL = 'https://wpcenter.herokuapp.com/parse';
+const mongoConnectionString = 'mongodb://heroku_253vdv8v:4m9qab9skph076ov6sujdjgoir@ds019488.mlab.com:19488/heroku_253vdv8v';
 
 //ARRAY CON LAS WEB DE LAS LIGAS RFEN
-const ligas = ["693506/calendar/1783704/", "693435/calendar/1782173/", "698931/calendar/1789530/", "696708/calendar/1785001/", "703924/calendar/1804510/"];
-const jornadas = [9636059, 9622408, 9674865, 9636114, 9730530];
+const datosligas = [
+                      {"url":"693506/calendar/1783704/", "urljornada":9636059, "nombre":"DHM", "numjornadas": 22}, 
+                      {"url":"693435/calendar/1782173/", "urljornada":9622408, "nombre":"DHF", "numjornadas": 22},
+                      {"url":"698931/calendar/1789530/", "urljornada":9674865, "nombre":"PDM", "numjornadas": 18},
+                      {"url":"696708/calendar/1785001/", "urljornada":9636114, "nombre":"PDF", "numjornadas": 18},
+                      {"url":"703924/calendar/1804510/", "urljornada":9730530, "nombre":"SDM", "numjornadas": 22}
+                   ];
 
 
-var url = 'https://rfen.es/es/tournament/'+ligas[0]+(jornadas[0]+10);
 
 
 
 
+const agenda = new Agenda({db: {address: mongoConnectionString}});
+agenda.processEvery('one minute');
 
-  
-rp(url)
-.then(async (html) => {
-  
-  const $ = cheerio.load(html);
-  
-  //preparar liga JSON
-  var datosJSON = { "jornada":"", "partidos":[]};
-  
-  //Scrape jornada numero
-  var jornadasText = $('.clearfix').find('h2').first().text();
-  jornadasText = jornadasText.slice(8, 10).replace(" ", "");
-  datosJSON.jornada = jornadasText;
-  let urls = [];
-  
-  $('.rowlink tr').each((i, tr) => {
-    
-    let urlPartido = $(tr).find('.colstyle-equipo a').attr('href');
-    //Añadir datos de url
-    urls.push(urlPartido);
-    
-  });
-  
-  await Promise.all(urls.map(async num => {
-    let partidoJSON = await scrapeDatosPartido(jornadasText,num);
-    datosJSON.partidos.push(partidoJSON);
-    Save.savePartidoActivoESP(partidoJSON, ligas[0], jornadasText);
-  }))
-  
-  //console.log(datosJSON);
-  
-  
-})
 
-.catch(function (err) {
-    console.log(err);
+agenda.define('hello', (job, done) => {
+  console.log('Hello! la hora es ', moment().toString());
 });
-    
+
+(async function() { // IIFE to give access to async/await
   
-      
-      
-    
+  await agenda.start();
+  
+  await agenda.every('3 minutes', 'hello');
+})();
 
 
-function scrapeDatosPartido(jornada,url) {
+
+
+function scrapeDatosPartido(jornada,url,fecha) {
   
   //Preparar JSON de retorno
-  let datosPartidoJSON = { "id":"", "jornada":jornada, "fhora":"", "local":"", "visitante":"", "goll":"", "golv":"", "url":url, "localJug":[], "visitanteJug":[]};
+  let datosPartidoJSON = { "id":"", "jornada":jornada, "fhora":fecha, "periodo":"", "local":"", "visitante":"", "goll":"", "golv":"", "url":url, "localJug":[], "visitanteJug":[]};
   
   return rp(url)
     .then(function (html) {
       let $ = cheerio.load(html);
       
-      let id = $('h1').text();
-      let equipos = id.split(" — ");
+      let id = $('h1').text().replace(" — "," - ");
+      let equipos = id.split(" - ");
       datosPartidoJSON.local = equipos[0];
       datosPartidoJSON.visitante = equipos[1];
       datosPartidoJSON.id = id;
@@ -87,7 +68,7 @@ function scrapeDatosPartido(jornada,url) {
         
         datosPartidoJSON.goll = localg;
         datosPartidoJSON.golv = visitanteg;
-        datosPartidoJSON.fhora = "Finalizado";
+        datosPartidoJSON.periodo = 5;
         
         //DAtos de jugadores
         $('.match-data').find('.rowlink').each((i,table) => {
@@ -120,17 +101,15 @@ function scrapeDatosPartido(jornada,url) {
       }
       else
       {
-        let hora = $('.auto-row').find('.col').eq(0).text().replace(/\s\s+/g, '').trim().slice(4, 9);
-        let fecha = $('.auto-row').find('.col').eq(1).text().replace(/\s\s+/g, '').trim().slice(10, 20);
-        datosPartidoJSON.fhora = fecha +" " +hora; 
+        datosPartidoJSON.periodo = 0;
         datosPartidoJSON.goll = 0;
         datosPartidoJSON.golv = 0;
       }
       
       
       
-      
-      //console.log(datosPartidoJSON);
+      //console.log(datosPartidoJSON.id);
+      //console.log(datosPartidoJSON.fhora);
       return datosPartidoJSON;
       
     })

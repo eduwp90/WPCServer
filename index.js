@@ -4,6 +4,9 @@
 var express = require('express');
 var ParseServer = require('parse-server').ParseServer;
 var cors = require('cors');
+var Agenda = require('agenda');
+var Agendash = require('agendash');
+const mongoConnectionString = 'mongodb://heroku_253vdv8v:4m9qab9skph076ov6sujdjgoir@ds019488.mlab.com:19488/heroku_253vdv8v';
 
 
 
@@ -45,6 +48,8 @@ app.use(cors());
 var mountPath = process.env.PARSE_MOUNT || '/parse';
 app.use(mountPath, api);
 
+const agenda = new Agenda({db: {address: mongoConnectionString}});
+app.use('/dash', Agendash(agenda));
 
 var port = process.env.PORT || 1337;
 app.listen(port, function() {
