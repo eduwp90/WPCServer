@@ -40,7 +40,7 @@ agenda.define('hello', (job, done) => {
   
   await agenda.start();
   
-  await agenda.every('3 minutes', 'hello');
+  await agenda.every('15 minutes', 'hello');
 })();
 
 
