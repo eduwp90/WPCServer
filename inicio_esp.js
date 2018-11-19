@@ -28,8 +28,8 @@ const datosligas = [
 
 
 
-const agenda = new Agenda({db: {address: mongoConnectionString}});
-agenda.processEvery('one minute');
+const agenda = new Agenda({db: {address: mongoConnectionString, useNewUrlParser: true }});
+
 
 
 agenda.define('hello', (job, done) => {
