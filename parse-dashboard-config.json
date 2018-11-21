@@ -15,4 +15,5 @@
     }
   ],
   "iconsFolder": "icons"
+  "useEncryptedPasswords": false
 }
