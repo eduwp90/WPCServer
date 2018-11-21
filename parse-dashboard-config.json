@@ -1,8 +1,8 @@
 {
   "apps": [{
-    "serverURL": process.env.SERVER_URL,
-    "appId": process.env.APP_ID,
-    "masterKey": process.env.MASTER_KEY,
+    "serverURL": "https://wpcenter.herokuapp.com/parse",
+    "appId": "Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD",
+    "masterKey": "KHbvuLSzmseM7U4QKcNP9bBsYXxbzDsiPVAJ5uhl",
     "appName": "WPCenter",
     "iconName": "",
     "primaryBackgroundColor": "",
