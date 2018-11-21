@@ -63,7 +63,7 @@ var mountPath = process.env.PARSE_MOUNT || '/parse';
 app.use(mountPath, api);
 
 const agenda = new Agenda({db: {address: mongoConnectionString}});
-app.use('/dash', Agendash(agenda));
+app.use('/agendash', Agendash(agenda));
 
 // make the Parse Dashboard available at /dashboard
 app.use('/dashboard', dashboard);
