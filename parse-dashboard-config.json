@@ -6,7 +6,8 @@
     "appName": "WPCenter",
     "iconName": "",
     "primaryBackgroundColor": "",
-    "secondaryBackgroundColor": ""
+    "secondaryBackgroundColor": "",
+    "production": true
   }],
   "users": [
     {
