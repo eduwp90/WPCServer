@@ -39,6 +39,7 @@ push: {
   }
 });
 
+var trustProxy = true;
 var dashboard = new ParseDashboard({
   "apps": [
     {
@@ -47,7 +48,8 @@ var dashboard = new ParseDashboard({
       "masterKey": process.env.MASTER_KEY,
       "appName": "WPCenter"
     }
-  ]
+  ],
+  "trustProxy": 1
 });
 
 
