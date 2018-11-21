@@ -34,6 +34,7 @@ const agenda = new Agenda({db: {address: mongoConnectionString, useNewUrlParser:
 
 agenda.define('hello', (job, done) => {
   console.log('Hello! la hora es ', moment().toString());
+  done();
 });
 
 (async function() { // IIFE to give access to async/await
@@ -42,6 +43,9 @@ agenda.define('hello', (job, done) => {
   
   await agenda.every('15 minutes', 'hello');
 })();
+
+
+
 
 
 

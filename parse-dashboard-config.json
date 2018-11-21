@@ -1,0 +1,18 @@
+{
+  "apps": [{
+    "serverURL": "",
+    "appId": "",
+    "masterKey": "",
+    "appName": "",
+    "iconName": "",
+    "primaryBackgroundColor": "",
+    "secondaryBackgroundColor": ""
+  }],
+  "users": [
+    {
+      "user":"eduwp90",
+      "pass":"dualdacano"
+    }
+  ],
+  "iconsFolder": "icons"
+}
