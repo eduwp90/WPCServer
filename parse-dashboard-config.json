@@ -14,6 +14,6 @@
       "pass":"dualdacano"
     }
   ],
-  "iconsFolder": "icons"
+  "iconsFolder": "icons",
   "useEncryptedPasswords": false
 }
