@@ -24,16 +24,25 @@ const datosligas = [
                    ];
 
 
-
-
-
-
 const agenda = new Agenda({db: {address: mongoConnectionString, useNewUrlParser: true }});
 
 
 
-agenda.define('hello', (job, done) => {
-  console.log('Hello! la hora es ', moment().toString());
+agenda.define('actualizarJActivas', (job, done) => {
+  console.log('ACT.JORNADAS ACTIVAS! la hora es ', moment().toString());
+  var GameScore = Parse.Object.extend("config");
+  var query = new Parse.Query(GameScore);
+  query.first()
+  .then( async (object) => {
+    // The object was retrieved successfully.
+    
+    await object.set("jornada_activaJSON", await scrapeDatosJornadaActiva());
+    object.save();
+    console.log('ACT.JORNADAS ACTIVAS! Done');
+  }, (error) => {
+    // The object was not retrieved successfully.
+    console.log("Error: " + error.code + " " + error.message);
+  });
   done();
 });
 
@@ -41,14 +50,16 @@ agenda.define('hello', (job, done) => {
   
   await agenda.start();
   
-  await agenda.every('15 minutes', 'hello');
+  await agenda.every('15 minutes', 'actualizarJActivas');
+  test();
+  
 })();
 
-
-
-
-
-
+async function test(){
+  
+  
+  
+};
 
 function scrapeDatosPartido(jornada,url,fecha) {
   
@@ -124,3 +135,38 @@ function scrapeDatosPartido(jornada,url,fecha) {
 
 }
 
+async function scrapeDatosJornadaActiva() {
+  
+  //Preparar JSON de retorno
+  let jornadaActivaJSON = [
+                      {"DHM":1}, 
+                      {"DHF":1},
+                      {"PDM":1},
+                      {"PDF":1},
+                      {"SDM":1}
+                   ];
+                   
+  for (var j = 0; j < jornadaActivaJSON.length; j++) { 
+    let url = 'https://rfen.es/es/tournament/'+datosligas[j].url.slice(0,6); 
+    
+    await rp(url)
+      .then(async function (html) {
+        let $ = await cheerio.load(html);
+        await $('.padd.half-padd-top.half-padd-bottom.relative.text-center').find('a').remove();
+        let jornadaNum = await $('.padd.half-padd-top.half-padd-bottom.relative.text-center').text().trim().replace("Jornada ","");
+        let jsonjor = await { [datosligas[j].nombre] : parseInt(jornadaNum)};
+        await jornadaActivaJSON.splice(j,1,jsonjor);
+        
+        
+        //await console.log(jornadaActivaJSON);
+        return jornadaActivaJSON;
+        
+      })
+      .catch(function (err) {
+          console.log(err);
+      });
+     
+  }
+  return jornadaActivaJSON;
+  
+}

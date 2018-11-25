@@ -6,7 +6,6 @@ var ParseServer = require('parse-server').ParseServer;
 var cors = require('cors');
 var Agenda = require('agenda');
 var Agendash = require('agendash');
-var ParseDashboard = require('parse-dashboard');
 const mongoConnectionString = 'mongodb://heroku_253vdv8v:4m9qab9skph076ov6sujdjgoir@ds019488.mlab.com:19488/heroku_253vdv8v';
 
 
@@ -40,17 +39,6 @@ push: {
 });
 
 var trustProxy = true;
-var dashboard = new ParseDashboard({
-  "apps": [
-    {
-      "serverURL": process.env.SERVER_URL,
-      "appId": process.env.APP_ID,
-      "masterKey": process.env.MASTER_KEY,
-      "appName": "WPCenter"
-    }
-  ],
-  "trustProxy": 1
-});
 
 
 
@@ -65,8 +53,6 @@ app.use(mountPath, api);
 const agenda = new Agenda({db: {address: mongoConnectionString}});
 app.use('/agendash', Agendash(agenda));
 
-// make the Parse Dashboard available at /dashboard
-app.use('/dashboard', dashboard);
 
 var port = process.env.PORT || 1337;
 app.listen(port, function() {
