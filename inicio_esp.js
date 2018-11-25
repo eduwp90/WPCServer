@@ -17,8 +17,8 @@ const mongoConnectionString = 'mongodb://heroku_253vdv8v:4m9qab9skph076ov6sujdjg
 //ARRAY CON LAS WEB DE LAS LIGAS RFEN
 const datosligas = [
                       {"url":"693506/calendar/1783704/", "urljornada":9636059, "nombre":"DHM", "numjornadas": 22}, 
-                      {"url":"693435/calendar/1782173/", "urljornada":9622408, "nombre":"DHF", "numjornadas": 22},
-                      {"url":"698931/calendar/1789530/", "urljornada":9674865, "nombre":"PDM", "numjornadas": 18},
+                      {"url":"693435/calendar/1782173/", "urljornada":9622408, "nombre":"DHF", "numjornadas": 18},
+                      {"url":"698931/calendar/1789530/", "urljornada":9674865, "nombre":"PDM", "numjornadas": 22},
                       {"url":"696708/calendar/1785001/", "urljornada":9636114, "nombre":"PDF", "numjornadas": 18},
                       {"url":"703924/calendar/1804510/", "urljornada":9730530, "nombre":"SDM", "numjornadas": 22}
                    ];
@@ -28,34 +28,66 @@ const agenda = new Agenda({db: {address: mongoConnectionString, useNewUrlParser:
 
 
 
-agenda.define('actualizarJActivas', (job, done) => {
-  console.log('ACT.JORNADAS ACTIVAS! la hora es ', moment().toString());
-  var GameScore = Parse.Object.extend("config");
-  var query = new Parse.Query(GameScore);
-  query.first()
-  .then( async (object) => {
-    // The object was retrieved successfully.
-    
-    await object.set("jornada_activaJSON", await scrapeDatosJornadaActiva());
-    object.save();
-    console.log('ACT.JORNADAS ACTIVAS! Done');
-  }, (error) => {
-    // The object was not retrieved successfully.
-    console.log("Error: " + error.code + " " + error.message);
-  });
-  done();
+agenda.define('actualizarJActivas', (job) => {
+  console.log('ACT.JORNADAS ACTIVAS! la hora es ', moment().tz("Europe/Madrid").format().toString());
+  Save.actualizarJActivasESP(scrapeDatosJornadaActiva());
+  console.log('ACT.JORNADAS ACTIVAS! FIN ', moment().tz("Europe/Madrid").format().toString());
+  job.repeatEvery('24 hours');
+  job.save();
+  
+});
+
+agenda.define('actualizarFechas', (job) => {
+  console.log('ACT.FECHAS! la hora es ', moment().tz("Europe/Madrid").format().toString());
+  scrapeFechas();
+  console.log('ACT.FECHAS! FIN ', moment().tz("Europe/Madrid").format().toString());
+  job.repeatEvery('24 hours');
+  job.save();
+  
 });
 
 (async function() { // IIFE to give access to async/await
   
   await agenda.start();
   
-  await agenda.every('15 minutes', 'actualizarJActivas');
-  test();
+  await agenda.schedule('at 3:00am', 'actualizarJActivas');
+  await agenda.schedule('at 4:00am', 'actualizarFechas');
+  
   
 })();
 
-async function test(){
+async function scrapeFechas(){
+  for (var i = 0; i < datosligas.length; i++){
+    for (var k = 0; k < datosligas[i].numjornadas; k++){
+      
+      let url = 'https://rfen.es/es/tournament/'+datosligas[i].url+(datosligas[i].urljornada+k)
+  
+      await rp(url)
+          .then(async function (html) {
+            let $ = await cheerio.load(html);
+            await $('.rowlink tr').each(async (j,tr) => {
+              let local = await $(tr).find('.colstyle-equipo').find('.ellipsis').first().text().trim();
+              let visitante = await $(tr).find('.colstyle-equipo').find('.ellipsis').eq(1).text().trim();
+              let fechaText = await $(tr).find('.colstyle-fecha').text().replace(/\s\s+/g, '').slice(5, 21).replace(/[^0-9/: ]/g, '').trim();
+              fechaText = moment(fechaText, 'DD/MM/YYYY HH:mm').toDate();
+              let id = local+" - "+visitante;
+              //console.log(url);
+              //console.log(local);
+              //console.log(visitante);
+              if (id != null || fechaText != null) {
+                await Save.actualizarFechaPartidoESP(id, datosligas[i].nombre, fechaText);
+              }
+            });
+          })
+          .catch(function (err) {
+              console.log('NO SE HA ENCONTRADO LA PAGINA - '+url);
+              console.error(err);
+          });
+    }
+  }
+}
+
+async function test1(){
   
   
   

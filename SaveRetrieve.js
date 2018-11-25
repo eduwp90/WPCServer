@@ -3,7 +3,7 @@ var Parse = require('parse/node');
 const moment = require("moment");
 
 Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq");
-Parse.serverURL = 'https://wpcenter.herokuapp.com/parse'
+Parse.serverURL = 'https://wpcenter.herokuapp.com/parse';
 
 
 
@@ -25,7 +25,6 @@ exports.savePartidoActivoESP = function(partidoJSON, liga, jornada){
         url: partidoJSON.url,
         goleadoresl: partidoJSON.localJug,
         goleadoresv: partidoJSON.visitanteJug,
-        liga: liga,
         id1: partidoJSON.id,
         periodo: partidoJSON.periodo,
         timeline: [{}]
@@ -36,11 +35,54 @@ exports.savePartidoActivoESP = function(partidoJSON, liga, jornada){
       // The save failed.
         console.log("The save failed.",error);
     });
-        
-    
        
-}
+};
 
+exports.actualizarJActivasESP = function(jornada){
+    var GameScore = Parse.Object.extend("config");
+    var query = new Parse.Query(GameScore);
+    query.first()
+        .then( async (object) => {
+            // The object was retrieved successfully.
+            await object.set("jornada_activaJSON", jornada);
+            object.save();
+            console.log('ACT.JORNADAS ACTIVAS! Done');
+        }, (error) => {
+            // The object was not retrieved successfully.
+            console.log("Error: " + error.code + " " + error.message);
+        });
+       
+};
+
+exports.actualizarFechaPartidoESP = function(id,liga,fhora){
+    
+    var GameScore = Parse.Object.extend("T1819");
+    var query = new Parse.Query(GameScore);
+    query.equalTo("liga", liga);
+    query.equalTo("id1", id);
+    query.first()
+        .then( async (object) => {
+            // The object was retrieved successfully.
+            if(object != null){
+                //console.log(object+ " "+ id);
+                if(object.get('fhora').getTime()==fhora.getTime()){
+                    //console.log('La fhora del partido '+id+ ' ya era la correcta');
+                }
+                else{
+                   await object.set("fhora", fhora);
+                    object.save();
+                    console.log('La fhora del partido '+id+ ' se ha actualizado'); 
+                }
+            }else{
+                console.log("ACTRUALIZAR FHORA:fallo al recuperar partido de parse "+ id);
+            }
+            
+        }, (error) => {
+            // The object was not retrieved successfully.
+            console.log("Error: " + error.code + " " + error.message);
+        });
+       
+};
 
 
 
