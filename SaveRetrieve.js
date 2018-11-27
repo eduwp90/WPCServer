@@ -1,10 +1,10 @@
 var request = require('./utiles');
 var Parse = require('parse/node');
 const moment = require("moment");
+const tz = require('moment-timezone');
 
 Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq");
 Parse.serverURL = 'https://wpcenter.herokuapp.com/parse';
-
 
 
 
@@ -85,4 +85,42 @@ exports.actualizarFechaPartidoESP = function(id,liga,fhora){
 };
 
 
-
+exports.recuperarPartidosActivosESP = async function(){
+    
+    let datos = [];
+    moment().utcOffset(60);
+    var ahora = moment().toDate();
+    //console.log(ahora);
+    var en7dias = moment().add(7, 'days').toDate();
+    //console.log(en7dias);
+    
+    const GameScore = Parse.Object.extend("T1819");
+    const query = new Parse.Query(GameScore);
+    query.greaterThanOrEqualTo("fhora", ahora);
+    query.lessThanOrEqualTo("fhora", en7dias);
+    const object = await query.find();
+    // Do something with the returned Parse.Object values
+    if(object != null){
+        console.log("RETRIEVE PROXIMOS PARTIDOS: recuperados "+object.length+" partidos");
+        
+        for (var i = 0; i < object.length; i++) {
+            let datospartido = {"id":"", "url":"", "liga":"", "fecha":new Date(), "jornada":1};
+            //console.log(object[i].get('id1'));
+            //console.log(object[i].get('fhora'));
+            //Do something
+            datospartido.id = object[i].get('id1');
+            datospartido.url = object[i].get('url');
+            datospartido.liga = object[i].get('liga');
+            datospartido.fecha = object[i].get('fhora');
+            datospartido.jornada = object[i].get('jornada');
+            await datos.push(datospartido);
+            
+        }
+        //await console.log(datos);
+        
+    }else{
+        console.log("RETRIEVE PROXIMOS PARTIDOS: fallo al recuperar partidos");
+    }
+    return datos;
+    
+};

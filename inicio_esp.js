@@ -28,11 +28,11 @@ const agenda = new Agenda({db: {address: mongoConnectionString, useNewUrlParser:
 
 
 
-agenda.define('actualizarJActivas', (job) => {
+agenda.define('actualizarJActivas', async (job) => {
   console.log('ACT.JORNADAS ACTIVAS! la hora es ', moment().tz("Europe/Madrid").format().toString());
-  Save.actualizarJActivasESP(scrapeDatosJornadaActiva());
+  Save.actualizarJActivasESP(await scrapeDatosJornadaActiva());
   console.log('ACT.JORNADAS ACTIVAS! FIN ', moment().tz("Europe/Madrid").format().toString());
-  job.repeatEvery('24 hours');
+  job.schedule('at 3.00am');
   job.save();
   
 });
@@ -41,17 +41,19 @@ agenda.define('actualizarFechas', (job) => {
   console.log('ACT.FECHAS! la hora es ', moment().tz("Europe/Madrid").format().toString());
   scrapeFechas();
   console.log('ACT.FECHAS! FIN ', moment().tz("Europe/Madrid").format().toString());
-  job.repeatEvery('24 hours');
+  job.schedule('at 3.30am');
   job.save();
   
 });
+
 
 (async function() { // IIFE to give access to async/await
   
   await agenda.start();
   
-  await agenda.schedule('at 3:00am', 'actualizarJActivas');
-  await agenda.schedule('at 4:00am', 'actualizarFechas');
+  await agenda.every('24 hours', 'actualizarJActivas');
+  await agenda.every('24 hours', 'actualizarFechas');
+  //await agenda.now('programarProxPartidos');
   
   
 })();
@@ -170,7 +172,7 @@ function scrapeDatosPartido(jornada,url,fecha) {
 async function scrapeDatosJornadaActiva() {
   
   //Preparar JSON de retorno
-  let jornadaActivaJSON = [
+  let jornadaActivaJSON = await [
                       {"DHM":1}, 
                       {"DHF":1},
                       {"PDM":1},
