@@ -23,8 +23,9 @@ const datosligas = [
                       {"url":"703924/calendar/1804510/", "urljornada":9730530, "nombre":"SDM", "numjornadas": 22}
                    ];
 
-
-const agenda = new Agenda({db: {address: mongoConnectionString, useNewUrlParser: true }});
+(async function() { // IIFE to give access to async/await
+const db = await MongoClient.connect(mongoConnectionString);
+const agenda = new Agenda.mongo(db);
 
 
 
@@ -32,8 +33,7 @@ agenda.define('actualizarJActivas', async (job) => {
   console.log('ACT.JORNADAS ACTIVAS! la hora es ', moment().tz("Europe/Madrid").format().toString());
   Save.actualizarJActivasESP(await scrapeDatosJornadaActiva());
   console.log('ACT.JORNADAS ACTIVAS! FIN ', moment().tz("Europe/Madrid").format().toString());
-  job.schedule('at 3.00am');
-  job.save();
+  
   
 });
 
@@ -41,18 +41,43 @@ agenda.define('actualizarFechas', (job) => {
   console.log('ACT.FECHAS! la hora es ', moment().tz("Europe/Madrid").format().toString());
   scrapeFechas();
   console.log('ACT.FECHAS! FIN ', moment().tz("Europe/Madrid").format().toString());
-  job.schedule('at 3.30am');
+  
+  
+});
+agenda.define('programarProxPartidos', async (job) => {
+  console.log('programarProxPartidos! la hora es ', moment().tz("Europe/Madrid").format().toString());
+  let partidos = await Save.recuperarPartidosActivosESP();
+  console.log(partidos);
+  if (partidos != null){
+    
+    for (var i = 0; i < partidos.length; i++) {
+      let nombrejob = partidos[i].id+" - "+partidos[i].liga;
+      
+    }
+    
+  }
+  
+  console.log('programarProxPartidos FIN', moment().tz("Europe/Madrid").format().toString());
+  
+  
+});
+
+agenda.define('C. WATERPOLO CASTELLÓ - C.D. WATERPOLO TURIA - SDM', async (job) => {
+  
+  console.log('programarProxPartidos FIN', moment().tz("Europe/Madrid").format().toString());
+  job.repeatEvery('24 hours');
   job.save();
   
 });
 
 
-(async function() { // IIFE to give access to async/await
+
   
+    
   await agenda.start();
   
-  await agenda.every('24 hours', 'actualizarJActivas');
-  await agenda.every('24 hours', 'actualizarFechas');
+  await agenda.every('0 3 * * *', 'actualizarJActivas');
+  await agenda.every('30 3 * * *', 'actualizarFechas');
   //await agenda.now('programarProxPartidos');
   
   
