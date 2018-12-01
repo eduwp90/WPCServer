@@ -137,8 +137,8 @@ exports.actualizarPartidoESP = function(partidoJSONstring){
             // The object was retrieved successfully.
             if(object != null){
                 //console.log(object+ " "+ id);
-                await object.set("goll", datos.goll);
-                await object.set("golv", datos.golv);
+                await object.set("goll", parseInt(datos.goll));
+                await object.set("golv", parseInt(datos.golv));
                 await object.set("goleadoresl", datos.localJug);
                 await object.set("goleadoresv", datos.visitanteJug);
                 await object.set("periodo", datos.periodo);

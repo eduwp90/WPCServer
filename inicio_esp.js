@@ -99,6 +99,9 @@ agenda.define('programarProxPartidos', async (job) => {
   await agenda.every('0 3 * * *', 'actualizarJActivas');
   await agenda.every('30 3 * * *', 'actualizarFechas');
   await agenda.every('0 4 * * *','programarProxPartidos');
+  //await agenda.now('CN. BARCELONA VISTA - QUADIS CN MATARO - DHM',{id:'CN. BARCELONA VISTA - QUADIS CN MATARO', jornada:9, url:'https://rfen.es/es/tournament/693506/match/74540231/results', fecha: new Date(2018,11,1,13,30,0,0), liga: 'DHM'});
+  
+  
   
 })();
 
