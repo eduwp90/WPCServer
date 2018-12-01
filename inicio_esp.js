@@ -57,14 +57,13 @@ agenda.define('programarProxPartidos', async (job) => {
       let liga = await partidos[i].liga;
       
       //Definir el job
-      await agenda.define(nombrejob, async (job,done) => {
+      await agenda.define(nombrejob, async (job) => {
   
         console.log('COMPROBANDO PARTIDO', job.attrs.data.id);
         let datospartido = await scrapeDatosPartido(job.attrs.data.jornada , job.attrs.data.url, job.attrs.data.fecha, job.attrs.data.liga);
         //console.log(datospartido);
         if (datospartido != null && datospartido.periodo == 5 ){
-          Save.actualizarPartidoESP(JSON.stringify(datospartido));
-          done();
+          await Save.actualizarPartidoESP(JSON.stringify(datospartido));
         }else{
           console.log('PARTIDO '+job.attrs.data.id+' sin acabar, reprogramando en 2 min');
           job.schedule('in 2 minutes');
