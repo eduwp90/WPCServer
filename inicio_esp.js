@@ -24,8 +24,8 @@ const datosligas = [
                    ];
 
 (async function() { // IIFE to give access to async/await
-const db = await MongoClient.connect(mongoConnectionString);
-const agenda = new Agenda.mongo(db);
+
+const agenda = new Agenda({db: {address: mongoConnectionString}});
 
 
 
@@ -47,11 +47,38 @@ agenda.define('actualizarFechas', (job) => {
 agenda.define('programarProxPartidos', async (job) => {
   console.log('programarProxPartidos! la hora es ', moment().tz("Europe/Madrid").format().toString());
   let partidos = await Save.recuperarPartidosActivosESP();
-  console.log(partidos);
   if (partidos != null){
     
     for (var i = 0; i < partidos.length; i++) {
-      let nombrejob = partidos[i].id+" - "+partidos[i].liga;
+      let nombrejob = await partidos[i].id+" - "+partidos[i].liga;
+      let jornada = await partidos[i].jornada;
+      let url =  await partidos[i].url;
+      let fecha = await partidos[i].fecha;
+      let liga = await partidos[i].liga;
+      
+      //Definir el job
+      await agenda.define(nombrejob, async (job,done) => {
+  
+        console.log('COMPROBANDO PARTIDO', job.attrs.data.id);
+        let datospartido = await scrapeDatosPartido(job.attrs.data.jornada , job.attrs.data.url, job.attrs.data.fecha, job.attrs.data.liga);
+        //console.log(datospartido);
+        if (datospartido != null && datospartido.periodo == 5 ){
+          Save.actualizarPartidoESP(JSON.stringify(datospartido));
+          done();
+        }else{
+          console.log('PARTIDO '+job.attrs.data.id+' sin acabar, reprogramando en 2 min');
+          job.schedule('in 2 minutes');
+          job.save();
+        }
+        console.log('programarProxPartidos FIN', moment().tz("Europe/Madrid").format().toString());
+        
+      });
+      
+      //programar el job
+      await agenda.cancel({name: nombrejob});
+      
+      await agenda.schedule(fecha, nombrejob, {id: partidos[i].id, jornada: jornada, url: url, fecha: fecha, liga: liga });
+      
       
     }
     
@@ -62,13 +89,7 @@ agenda.define('programarProxPartidos', async (job) => {
   
 });
 
-agenda.define('C. WATERPOLO CASTELLÓ - C.D. WATERPOLO TURIA - SDM', async (job) => {
-  
-  console.log('programarProxPartidos FIN', moment().tz("Europe/Madrid").format().toString());
-  job.repeatEvery('24 hours');
-  job.save();
-  
-});
+
 
 
 
@@ -78,8 +99,7 @@ agenda.define('C. WATERPOLO CASTELLÓ - C.D. WATERPOLO TURIA - SDM', async (job)
   
   await agenda.every('0 3 * * *', 'actualizarJActivas');
   await agenda.every('30 3 * * *', 'actualizarFechas');
-  //await agenda.now('programarProxPartidos');
-  
+  await agenda.now('programarProxPartidos');
   
 })();
 
@@ -120,10 +140,10 @@ async function test1(){
   
 };
 
-function scrapeDatosPartido(jornada,url,fecha) {
+function scrapeDatosPartido(jornada,url,fecha, liga) {
   
   //Preparar JSON de retorno
-  let datosPartidoJSON = { "id":"", "jornada":jornada, "fhora":fecha, "periodo":"", "local":"", "visitante":"", "goll":"", "golv":"", "url":url, "localJug":[], "visitanteJug":[]};
+  let datosPartidoJSON = { "id":"", "jornada":jornada, "fhora":fecha, "periodo":"", "local":"", "visitante":"", "goll":"", "golv":"", "url":url, "localJug":[], "visitanteJug":[], "liga":liga};
   
   return rp(url)
     .then(function (html) {

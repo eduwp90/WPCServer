@@ -124,3 +124,34 @@ exports.recuperarPartidosActivosESP = async function(){
     return datos;
     
 };
+
+exports.actualizarPartidoESP = function(partidoJSONstring){
+    
+    let datos = JSON.parse(partidoJSONstring);
+    var GameScore = Parse.Object.extend("T1819");
+    var query = new Parse.Query(GameScore);
+    query.equalTo("liga", datos.liga);
+    query.equalTo("id1", datos.id);
+    query.first()
+        .then( async (object) => {
+            // The object was retrieved successfully.
+            if(object != null){
+                //console.log(object+ " "+ id);
+                await object.set("goll", datos.goll);
+                await object.set("golv", datos.golv);
+                await object.set("goleadoresl", datos.localJug);
+                await object.set("goleadoresv", datos.visitanteJug);
+                await object.set("periodo", datos.periodo);
+                object.save();
+                console.log('Los datos del partido '+datos.id+ ' se han actualizado'); 
+                
+            }else{
+                console.log("ACTRUALIZAR PARTIDO:fallo al recuperar partido de parse "+ datos.id);
+            }
+            
+        }, (error) => {
+            // The object was not retrieved successfully.
+            console.log("Error: " + error.code + " " + error.message);
+        });
+       
+};
