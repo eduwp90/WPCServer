@@ -44,6 +44,24 @@ agenda.define('actualizarFechas', (job) => {
   
   
 });
+
+//Definir el job
+await agenda.define('actualizarPartido', async (job) => {
+
+  console.log('COMPROBANDO PARTIDO', job.attrs.data.id);
+  let datospartido = await scrapeDatosPartido(job.attrs.data.jornada , job.attrs.data.url, job.attrs.data.fecha, job.attrs.data.liga);
+  //console.log(datospartido);
+  if (datospartido != null && datospartido.periodo == 5 ){
+    await Save.actualizarPartidoESP(JSON.stringify(datospartido));
+  }else{
+    console.log('PARTIDO '+job.attrs.data.id+' sin acabar, reprogramando en 2 min');
+    job.schedule('in 2 minutes');
+    job.save();
+  }
+  console.log('programarProxPartidos FIN', moment().tz("Europe/Madrid").format().toString());
+  
+});
+      
 agenda.define('programarProxPartidos', async (job) => {
   console.log('programarProxPartidos! la hora es ', moment().tz("Europe/Madrid").format().toString());
   let partidos = await Save.recuperarPartidosActivosESP();
@@ -56,27 +74,14 @@ agenda.define('programarProxPartidos', async (job) => {
       let fecha = await partidos[i].fecha;
       let liga = await partidos[i].liga;
       
-      //Definir el job
-      await agenda.define(nombrejob, async (job) => {
-  
-        console.log('COMPROBANDO PARTIDO', job.attrs.data.id);
-        let datospartido = await scrapeDatosPartido(job.attrs.data.jornada , job.attrs.data.url, job.attrs.data.fecha, job.attrs.data.liga);
-        //console.log(datospartido);
-        if (datospartido != null && datospartido.periodo == 5 ){
-          await Save.actualizarPartidoESP(JSON.stringify(datospartido));
-        }else{
-          console.log('PARTIDO '+job.attrs.data.id+' sin acabar, reprogramando en 2 min');
-          job.schedule('in 2 minutes');
-          job.save();
-        }
-        console.log('programarProxPartidos FIN', moment().tz("Europe/Madrid").format().toString());
-        
-      });
+      
       
       //programar el job
-      await agenda.cancel({name: nombrejob});
-      
-      await agenda.schedule(fecha, nombrejob, {id: partidos[i].id, jornada: jornada, url: url, fecha: fecha, liga: liga });
+      let data = {id: partidos[i].id, jornada: jornada, url: url, fecha: fecha, liga: liga };
+      agenda.create('actualizarPartido', data)
+        .unique({'data.id': partidos[i].id, 'data.jornada': jornada, 'data.url': url, 'data.fecha': fecha, 'data.liga': liga })
+        .schedule(fecha)
+        .save();
       
       
     }
@@ -96,10 +101,11 @@ agenda.define('programarProxPartidos', async (job) => {
     
   await agenda.start();
   
-  await agenda.every('0 3 * * *', 'actualizarJActivas');
-  await agenda.every('30 3 * * *', 'actualizarFechas');
-  await agenda.every('0 4 * * *','programarProxPartidos');
-  //await agenda.now('CN. BARCELONA VISTA - QUADIS CN MATARO - DHM',{id:'CN. BARCELONA VISTA - QUADIS CN MATARO', jornada:9, url:'https://rfen.es/es/tournament/693506/match/74540231/results', fecha: new Date(2018,11,1,13,30,0,0), liga: 'DHM'});
+  await agenda.every('0 1 * * *', 'actualizarJActivas');
+  await agenda.every('30 1 * * *', 'actualizarFechas');
+  await agenda.every('0 2 * * *','programarProxPartidos');
+  
+  
   
   
   
