@@ -29,12 +29,11 @@ const agenda = new Agenda({db: {address: mongoConnectionString}});
 
 
 
-agenda.define('actualizarJActivas', async (job) => {
+agenda.define('actualizarJActivas', async (job,done) => {
   console.log('ACT.JORNADAS ACTIVAS! la hora es ', moment().tz("Europe/Madrid").format().toString());
-  Save.actualizarJActivasESP(await scrapeDatosJornadaActiva());
+  await Save.actualizarJActivasESP(await scrapeDatosJornadaActiva());
   console.log('ACT.JORNADAS ACTIVAS! FIN ', moment().tz("Europe/Madrid").format().toString());
-  
-  
+  done();
 });
 
 agenda.define('actualizarFechas', (job) => {
@@ -104,6 +103,7 @@ agenda.define('programarProxPartidos', async (job) => {
   await agenda.every('0 1 * * *', 'actualizarJActivas');
   await agenda.every('30 1 * * *', 'actualizarFechas');
   await agenda.every('0 2 * * *','programarProxPartidos');
+  //await agenda.now('actualizarJActivas');
   
   
   
