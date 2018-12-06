@@ -36,9 +36,9 @@ agenda.define('actualizarJActivas', async (job,done) => {
   done();
 });
 
-agenda.define('actualizarFechas', (job) => {
+agenda.define('actualizarFechas', async (job) => {
   console.log('ACT.FECHAS! la hora es ', moment().tz("Europe/Madrid").format().toString());
-  scrapeFechas();
+  await scrapeFechas();
   console.log('ACT.FECHAS! FIN ', moment().tz("Europe/Madrid").format().toString());
   
   
@@ -133,6 +133,7 @@ async function scrapeFechas(){
                 await Save.actualizarFechaPartidoESP(id, datosligas[i].nombre, fechaText);
               }
             });
+            
           })
           .catch(function (err) {
               console.log('NO SE HA ENCONTRADO LA PAGINA - '+url);
@@ -225,15 +226,16 @@ function scrapeDatosPartido(jornada,url,fecha, liga) {
 async function scrapeDatosJornadaActiva() {
   
   //Preparar JSON de retorno
-  let jornadaActivaJSON = await [
-                      {"DHM":1}, 
-                      {"DHF":1},
-                      {"PDM":1},
-                      {"PDF":1},
-                      {"SDM":1}
-                   ];
+  let jornadaActivaJSON = await {
+                      "DHM":1, 
+                      "DHF":1,
+                      "PDM":1,
+                      "PDF":1,
+                      "SDM":1
+                      };
+    
                    
-  for (var j = 0; j < jornadaActivaJSON.length; j++) { 
+  for (var j = 0; j < Object.keys(jornadaActivaJSON).length; j++) { 
     let url = 'https://rfen.es/es/tournament/'+datosligas[j].url.slice(0,6); 
     
     await rp(url)
@@ -241,19 +243,19 @@ async function scrapeDatosJornadaActiva() {
         let $ = await cheerio.load(html);
         await $('.padd.half-padd-top.half-padd-bottom.relative.text-center').find('a').remove();
         let jornadaNum = await $('.padd.half-padd-top.half-padd-bottom.relative.text-center').text().trim().replace("Jornada ","");
-        let jsonjor = await { [datosligas[j].nombre] : parseInt(jornadaNum)};
-        await jornadaActivaJSON.splice(j,1,jsonjor);
+        jornadaActivaJSON[datosligas[j].nombre]=parseInt(jornadaNum);
         
         
-        //await console.log(jornadaActivaJSON);
+        
         return jornadaActivaJSON;
         
       })
       .catch(function (err) {
           console.log(err);
       });
-     
+     console.log(jornadaActivaJSON);
   }
+  
   return jornadaActivaJSON;
   
 }

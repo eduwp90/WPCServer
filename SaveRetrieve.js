@@ -44,9 +44,9 @@ exports.actualizarJActivasESP = function(jornada){
     query.first()
         .then( async (object) => {
             // The object was retrieved successfully.
-            await object.set("jornada_activaJSON", jornada);
+            await object.set("jornadas_activasJSON", jornada);
             object.save();
-            console.log('ACT.JORNADAS ACTIVAS! Done');
+            //console.log('ACT.JORNADAS ACTIVAS! Done');
         }, (error) => {
             // The object was not retrieved successfully.
             console.log("Error: " + error.code + " " + error.message);
