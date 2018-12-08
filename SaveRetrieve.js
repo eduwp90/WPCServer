@@ -3,8 +3,24 @@ var Parse = require('parse/node');
 const moment = require("moment");
 const tz = require('moment-timezone');
 
-Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq");
+Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq","KHbvuLSzmseM7U4QKcNP9bBsYXxbzDsiPVAJ5uhl");
 Parse.serverURL = 'https://wpcenter.herokuapp.com/parse';
+
+
+
+Parse.Push.send({
+  channels: ["Test"],
+  data: {alert: "The Giants won against the Mets 2-3."},
+    useMasterKey: true
+    
+})
+.then(function() {
+  console.log("---------------push-----------------","OK");
+}, function(error) {
+  console.log("----------------push----------------",error);
+});
+
+
 
 
 
