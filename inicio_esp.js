@@ -104,6 +104,7 @@ agenda.define('programarProxPartidos', async (job) => {
   await agenda.every('30 1 * * *', 'actualizarFechas');
   await agenda.every('0 2 * * *','programarProxPartidos');
   //await agenda.now('actualizarJActivas');
+  //actualizarAtrasados();
   
   
   
@@ -257,5 +258,38 @@ async function scrapeDatosJornadaActiva() {
   }
   
   return jornadaActivaJSON;
+  
+}
+
+async function actualizarAtrasados() {
+  
+  
+    moment().utcOffset(60);
+    var ahora = moment().toDate();
+    //console.log(ahora);
+    
+    
+    const GameScore = Parse.Object.extend("T1819");
+    const query = new Parse.Query(GameScore);
+    query.lessThanOrEqualTo("fhora", ahora);
+    query.notEqualTo("periodo", 5);
+    const object = await query.find();
+    // Do something with the returned Parse.Object values
+    if(object != null){
+        console.log("RETRIEVE ATRAS PARTIDOS: recuperados "+object.length+" partidos");
+        
+        for (var i = 0; i < object.length; i++) {
+          if (object[i].get("periodo")!=5){
+            console.log("ACTUALIZANDO: "+object[i].get("id1"));
+            let partidoJSON = await scrapeDatosPartido(object[i].get("jornada"),object[i].get("url"),object[i].get("fhora"),object[i].get("liga"));
+            await Save.actualizarPartidoESP(JSON.stringify(partidoJSON));
+          }
+        }
+        await console.log("FIN ACTUALIZAR PARTIDOS ATRASADOS");
+        
+    }else{
+        console.log("RETRIEVE ATRAS PARTIDOS: fallo al recuperar partidos");
+        
+    }
   
 }
