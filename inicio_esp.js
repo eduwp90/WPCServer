@@ -101,8 +101,8 @@ agenda.define('programarProxPartidos', async (job) => {
   await agenda.start();
   
   await agenda.every('0 1 * * *', 'actualizarJActivas');
-  await agenda.every('30 1 * * *', 'actualizarFechas');
-  await agenda.every('0 2 * * *','programarProxPartidos');
+  await agenda.every('10 1 * * *', 'actualizarFechas');
+  await agenda.every('20 1 * * *','programarProxPartidos');
   //await agenda.now('actualizarJActivas');
   //actualizarAtrasados();
   
