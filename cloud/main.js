@@ -1,7 +1,6 @@
 // Defined in cloud/main.js on Parse server side
 Parse.Cloud.define('push_partido', function(request, response) {
   var params = request.params;
-  var customData = params.customData;
   var channels = params.channels;
   var title = params.title;
   var alertmsg = params.alert;
