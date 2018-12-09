@@ -106,29 +106,6 @@ agenda.define('programarProxPartidos', async (job) => {
   await agenda.every('20 1 * * *','programarProxPartidos');
   //await agenda.now('actualizarJActivas');
   //actualizarAtrasados();
-  let id = "QUADIS CN MATARO - CN ATLETIC-BARCELONETA";
-  let liga ="DHM";
-  var channels = [id+" - "+liga];
-                    var array = await id.split(" - ");
-                    for (var i = 0; i < array.length; i++) {
-                        let str = array[i];
-                        str = await str.replace("CN","");
-                        str = await str.replace(/([A-Z]+\.){1,}/g,'');
-                        str = await str.replace("DE ","");
-                        str = await str.replace("-"," ");
-                        str = await str.trim();
-                        str = await str.toLowerCase();
-                        str = await Utiles.FirstUpper(str);
-                        await array.splice(i,1,str);
-                        console.log(array[i]);
-                    }
-                    const params =  { channels: channels, title: "Partido Finalizado", alert: await array[0]+" "+6+" - "+5+" "+await array[1] };
-                    Parse.Cloud.run("push_partido", params);
- 
-  
-  
-  
-  
   
   
 })();

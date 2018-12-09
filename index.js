@@ -1,6 +1,6 @@
 // Example express application adding the parse-server module to expose Parse
 // compatible API routes.
-
+var path    = require("path");
 var express = require('express');
 var ParseServer = require('parse-server').ParseServer;
 var cors = require('cors');
@@ -62,3 +62,7 @@ app.listen(port, function() {
 var httpServer = require('http').createServer(app);
 httpServer.listen(4040);
 
+app.get('/pp',function(req,res){
+  res.sendFile(path.join(__dirname+'/pp.html'));
+  //__dirname : It will resolve to your project folder.
+});
