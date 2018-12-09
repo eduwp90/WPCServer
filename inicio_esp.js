@@ -7,6 +7,7 @@ const Save = require('./SaveRetrieve.js');
 const tz = require('moment-timezone');
 const Agenda = require('agenda');
 const moment = require('moment');
+const Utiles = require("./utiles.js");
 const { MongoClient } = require('mongodb');
 
 
@@ -51,7 +52,7 @@ await agenda.define('actualizarPartido', async (job) => {
   let datospartido = await scrapeDatosPartido(job.attrs.data.jornada , job.attrs.data.url, job.attrs.data.fecha, job.attrs.data.liga);
   //console.log(datospartido);
   if (datospartido != null && datospartido.periodo == 5 ){
-    await Save.actualizarPartidoESP(JSON.stringify(datospartido));
+    await Save.actualizarPartidoESP(JSON.stringify(datospartido),true);
   }else{
     console.log('PARTIDO '+job.attrs.data.id+' sin acabar, reprogramando en 2 min');
     job.schedule('in 2 minutes');
@@ -105,8 +106,25 @@ agenda.define('programarProxPartidos', async (job) => {
   await agenda.every('20 1 * * *','programarProxPartidos');
   //await agenda.now('actualizarJActivas');
   //actualizarAtrasados();
-  //const params =  { movie: "The Matrix" };
- //Parse.Cloud.run("averageStars", params);
+  let id = "QUADIS CN MATARO - CN ATLETIC-BARCELONETA";
+  let liga ="DHM";
+  var channels = [id+" - "+liga];
+                    var array = await id.split(" - ");
+                    for (var i = 0; i < array.length; i++) {
+                        let str = array[i];
+                        str = await str.replace("CN","");
+                        str = await str.replace(/([A-Z]+\.){1,}/g,'');
+                        str = await str.replace("DE ","");
+                        str = await str.replace("-"," ");
+                        str = await str.trim();
+                        str = await str.toLowerCase();
+                        str = await Utiles.FirstUpper(str);
+                        await array.splice(i,1,str);
+                        console.log(array[i]);
+                    }
+                    const params =  { channels: channels, title: "Partido Finalizado", alert: await array[0]+" "+6+" - "+5+" "+await array[1] };
+                    Parse.Cloud.run("push_partido", params);
+ 
   
   
   

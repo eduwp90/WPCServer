@@ -2,6 +2,7 @@ var request = require('./utiles');
 var Parse = require('parse/node');
 const moment = require("moment");
 const tz = require('moment-timezone');
+const Utiles = require("./utiles.js");
 
 Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq");
 Parse.serverURL = 'https://wpcenter.herokuapp.com/parse';
@@ -124,7 +125,7 @@ exports.recuperarPartidosActivosESP = async function(){
     
 };
 
-exports.actualizarPartidoESP = function(partidoJSONstring){
+exports.actualizarPartidoESP = function(partidoJSONstring, push){
     
     let datos = JSON.parse(partidoJSONstring);
     var GameScore = Parse.Object.extend("T1819");
@@ -142,7 +143,26 @@ exports.actualizarPartidoESP = function(partidoJSONstring){
                 await object.set("goleadoresv", datos.visitanteJug);
                 await object.set("periodo", datos.periodo);
                 object.save();
-                console.log('Los datos del partido '+datos.id+ ' se han actualizado'); 
+                console.log('Los datos del partido '+datos.id+ ' se han actualizado');
+                if(push){
+                    let id = datos.id;
+                    let channels =[datos.id+" - "+datos.liga];
+                    var array = id.split(" - ");
+                    for (var i = 0; i < array.length; i++) {
+                        let str = array[i];
+                        str = await str.replace("CN","");
+                        str = await str.replace(/([A-Z]+\.){1,}/g,'');
+                        str = await str.replace("DE ","");
+                        str = await str.replace("-"," ");
+                        str = await str.trim();
+                        str = await str.toLowerCase();
+                        str = await Utiles.FirstUpper(str);
+                        await array.splice(i,1,str);
+                        console.log(array[i]);
+                    }
+                    const params =  { channels: channels, title: "Partido Finalizado", alert: array[0]+" "+datos.goll+" - "+datos.golv+" "+array[1] };
+                    Parse.Cloud.run("push_partido", params);
+                }
                 
             }else{
                 console.log("ACTRUALIZAR PARTIDO:fallo al recuperar partido de parse "+ datos.id);
