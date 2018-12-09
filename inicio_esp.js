@@ -105,6 +105,9 @@ agenda.define('programarProxPartidos', async (job) => {
   await agenda.every('20 1 * * *','programarProxPartidos');
   //await agenda.now('actualizarJActivas');
   //actualizarAtrasados();
+  //const params =  { movie: "The Matrix" };
+ //Parse.Cloud.run("averageStars", params);
+  
   
   
   
@@ -116,7 +119,7 @@ async function scrapeFechas(){
   for (var i = 0; i < datosligas.length; i++){
     for (var k = 0; k < datosligas[i].numjornadas; k++){
       
-      let url = 'https://rfen.es/es/tournament/'+datosligas[i].url+(datosligas[i].urljornada+k)
+      let url = 'https://rfen.es/es/tournament/'+datosligas[i].url+(datosligas[i].urljornada+k);
   
       await rp(url)
           .then(async function (html) {

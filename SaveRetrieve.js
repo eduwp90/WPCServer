@@ -8,13 +8,6 @@ Parse.serverURL = 'https://wpcenter.herokuapp.com/parse';
 
 
 
-
-
-
-
-
-
-
 exports.savePartidoActivoESP = function(partidoJSON, liga, jornada){
     console.log("GUARDANDO DATOS", partidoJSON.fhora);
     var GameScore = Parse.Object.extend("T1819");

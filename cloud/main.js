@@ -1,25 +1,28 @@
 // Defined in cloud/main.js on Parse server side
-Parse.Cloud.define('pingReply', function(request, response) {
+Parse.Cloud.define('push_partido', function(request, response) {
   var params = request.params;
   var customData = params.customData;
-
-  if (!customData) {
-    response.error("Missing customData!")
-  }
-
-  var sender = JSON.parse(customData).sender;
-  var query = new Parse.Query(Parse.Installation);
-  query.equalTo("installationId", sender);
+  var channels = params.channels;
+  var title = params.title;
+  var alertmsg = params.alert;
 
   Parse.Push.send({
-  where: query,
-  // Parse.Push requires a dictionary, not a string.
-  data: {"alert": "The Giants scored!"},
-  }, { success: function() {
-     console.log("#### PUSH OK");
-  }, error: function(error) {
-     console.log("#### PUSH ERROR" + error.message);
-  }, useMasterKey: true});
-
-  response.success('success');
+            channels: channels,
+            data: {
+                title: title,
+                alert: alertmsg,
+            }
+       }, {
+            success: function () {
+                // Push was successful
+                response.success("push sent");
+                console.log("Success: push sent");
+            },
+            error: function (error) {
+                // Push was unsucessful
+                response.error("error with push: " + error);
+                console.log("Error: " + error);
+            },
+            useMasterKey: true
+       });
 });
