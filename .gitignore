@@ -28,3 +28,7 @@ node_modules
 
 # Emacs
 *~
+
+
+# claves
+/keys.txt

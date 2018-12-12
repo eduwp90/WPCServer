@@ -11,7 +11,7 @@ const Utiles = require("./utiles.js");
 const { MongoClient } = require('mongodb');
 
 
-Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq","KHbvuLSzmseM7U4QKcNP9bBsYXxbzDsiPVAJ5uhl");
+Parse.initialize("","","");
 Parse.serverURL = 'https://wpcenter.herokuapp.com/parse';
 const mongoConnectionString = 'mongodb://heroku_253vdv8v:4m9qab9skph076ov6sujdjgoir@ds019488.mlab.com:19488/heroku_253vdv8v';
 
