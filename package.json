@@ -17,7 +17,7 @@
     "kerberos": "~1.1.x",
     "moment": "^2.27.0",
     "moment-timezone": "0.5.31",
-    "mongodb": "^3.6.1",
+    "mongodb": "^3.1.13",
     "node-persist": "3.1.0",
     "parse": "2.15.0",
     "parse-dashboard": "^2.1.0",
