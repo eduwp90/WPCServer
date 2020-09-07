@@ -6,12 +6,12 @@ var ParseServer = require('parse-server').ParseServer;
 var cors = require('cors');
 var Agenda = require('agenda');
 var Agendash = require('agendash');
-const mongoConnectionString = 'mongodb://heroku_253vdv8v:4m9qab9skph076ov6sujdjgoir@ds019488.mlab.com:19488/heroku_253vdv8v';
+const mongoConnectionString = 'mongodb+srv://heroku_253vdv8v:4m9qab9skph076ov6sujdjgoir@cluster0.atsqf.mongodb.net/heroku_253vdv8v?retryWrites=true&w=majority';
 var pushConfig = {};
 
 
 
-var databaseUri = process.env.MONGOLAB_URI || process.env.DATABASE_URI;
+var databaseUri = process.env.DB_URI || process.env.DATABASE_URI;
 
 
 if (!databaseUri) {
@@ -23,7 +23,7 @@ if (process.env.FCM_API_KEY) {
 }
 
 var api = new ParseServer({
-  databaseURI: databaseUri || 'mongodb://heroku_253vdv8v:4m9qab9skph076ov6sujdjgoir@ds019488.mlab.com:19488/heroku_253vdv8v',
+  databaseURI: databaseUri || 'mongodb+srv://heroku_253vdv8v:4m9qab9skph076ov6sujdjgoir@cluster0.atsqf.mongodb.net/heroku_253vdv8v?retryWrites=true&w=majority',
   cloud: process.env.CLOUD_CODE_MAIN || __dirname + '/cloud/main.js',
   appId: process.env.APP_ID || 'myAppId',
   masterKey: process.env.MASTER_KEY || '' , //Add your master key here. Keep it secret! 
