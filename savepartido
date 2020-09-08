@@ -1,0 +1,69 @@
+xray('http://rfen.es/publicacion/waterpolo/asp/ficha.asp?cod=15651', {
+  equipos: ['td.contenido2[width="40%"]'],
+  resultado: ['td.contenido2[valign="TOP"]'],
+  jugadores: ['td.titulo2[align="left"]'],
+  datos: ['td.titulo2[align="center"]:not([width="3%"])']
+  
+})(function(err, obj) {
+  console.log(err);
+  
+  //TRATAR DATOS Y DEJARLOS COPMO JSON ARRAY ORDENADO Y ENTENDIBLE
+  var localtext = obj.equipos[0].replace(/(\r\n|\n|\r)/gm,"").trim();
+  var visitantetext = obj.equipos[1].replace(/(\r\n|\n|\r)/gm,"").trim();
+  
+  var resultlocal = obj.resultado[0].replace(/(\r\n|\n|\r)/gm,"").trim();
+  var resultvisitante = obj.resultado[1].replace(/(\r\n|\n|\r)/gm,"").trim();
+  var j;
+  var estadisticas= [];
+  var objv = {};
+  objv[localtext]=[];
+  estadisticas.push(objv);
+  for (var i = 0; i < 14; i++){
+    var jugadorstring;
+     if (obj.datos[i*7] === "Totales") { jugadorstring="TOTALES" }else{
+       jugadorstring= obj.jugadores[i].replace(/\s+/g, " ").trim()
+     }
+    var jugadoract = {};
+    jugadoract[jugadorstring]=
+      {"GT": obj.datos[(i*7)+1],
+      "IGD": obj.datos[(i*7)+2],
+      "SUP": obj.datos[(i*7)+3],
+      "GPEN": obj.datos[(i*7)+4],
+      "EXP": obj.datos[(i*7)+5],
+      "PEN": obj.datos[(i*7)+6]
+      };
+   
+    estadisticas[0][localtext].push(jugadoract);
+    j=i;
+    if (obj.datos[i*7] === "Totales") { break; }
+  }
+  var objv1 = {};
+  objv1[visitantetext]=[];
+  estadisticas.push(objv1);
+   
+  j=j+1;
+  for (var ii = 0; ii < 14; ii++){
+    var jugadorstring1;
+    var totales=obj.datos[(ii*7)+(j*7)];
+     if (obj.datos[(ii*7)+(j*7)] === "Totales") { jugadorstring1="TOTALES" }else{
+       jugadorstring1= obj.jugadores[ii+j-1].replace(/\s+/g, " ").trim();
+     }
+    var jugadoract1 = {};
+    jugadoract1[jugadorstring1]=
+      {"GT": obj.datos[(ii*7)+(j*7)+1],
+      "IGD": obj.datos[(ii*7)+(j*7)+2],
+      "SUP": obj.datos[(ii*7)+(j*7)+3],
+      "GPEN": obj.datos[(ii*7)+(j*7)+4],
+      "EXP": obj.datos[(ii*7)+(j*7)+5],
+      "PEN": obj.datos[(ii*7)+(j*7)+6]
+      };
+   
+    estadisticas[1][visitantetext].push(jugadoract1);
+    
+    
+    if (obj.datos[(ii*7)+(j*7)] === "Totales") { break; }
+  }
+  console.log(JSON.stringify(estadisticas,null,2));
+  
+  
+});
