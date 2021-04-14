@@ -1,7 +1,6 @@
 //const utiles = require('./utiles');
 require('dotenv').config()
 const Parse = require('parse/node');
-const rp = require('request-promise');
 const request = require('request');
 const cheerio = require('cheerio');
 const Save = require('./SaveRetrieve.js');
@@ -10,6 +9,7 @@ const Agenda = require('agenda');
 const moment = require('moment');
 const Utiles = require("./utiles.js");
 const { MongoClient } = require('mongodb');
+const rp = require('axios').default;
 
 
 Parse.initialize(process.env.APP_ID, process.env.JAVASCRIPT_KEY,process.env.MASTER_KEY);
@@ -22,13 +22,7 @@ if (!databaseUri) {
 const mongoConnectionString = databaseUri;
 
 //ARRAY CON LAS WEB DE LAS LIGAS RFEN
-const datosligas = [
-                      {"url":"693506/calendar/1783704/", "urljornada":9636059, "nombre":"DHM", "numjornadas": 22}, 
-                      {"url":"693435/calendar/1782173/", "urljornada":9622408, "nombre":"DHF", "numjornadas": 18},
-                      {"url":"698931/calendar/1789530/", "urljornada":9674865, "nombre":"PDM", "numjornadas": 22},
-                      {"url":"696708/calendar/1785001/", "urljornada":9636114, "nombre":"PDF", "numjornadas": 18},
-                      {"url":"703924/calendar/1804510/", "urljornada":9730530, "nombre":"SDM", "numjornadas": 22}
-                   ];
+const datosligas = Utiles.datosligas;
 
 (async function() { // IIFE to give access to async/await
 

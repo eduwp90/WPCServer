@@ -4,7 +4,7 @@ const moment = require("moment");
 const tz = require('moment-timezone');
 const Utiles = require("./utiles.js");
 
-Parse.initialize("Jbp3tpUJvfm54iaYts9Q8bcmXR7EUMt3WUmgsQCD","onQyTfEwQdMcELPrkbf5F0aG6ltfgMsAD3KhtGMq");
+Parse.initialize(process.env.APP_ID, process.env.JAVASCRIPT_KEY,process.env.MASTER_KEY);
 Parse.serverURL = 'https://wpcenter.herokuapp.com/parse';
 
 
